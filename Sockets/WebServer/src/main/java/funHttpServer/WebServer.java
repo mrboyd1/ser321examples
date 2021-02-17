@@ -28,7 +28,7 @@ import java.nio.charset.Charset;
 
 class WebServer {
   public static void main(String args[]) {
-    WebServer server = new WebServer(9000);
+    WebServer server = new WebServer(8080);
   }
 
   /**
@@ -206,8 +206,19 @@ class WebServer {
           Integer num2 = Integer.parseInt(query_pairs.get("num2"));
 
           // do math
+	  try{
           Integer result = num1 * num2;
-
+	  }
+	  catch(Exception e){
+	  builder.append("HTTP/1.1 415 Unsupported Media Type\n");
+	  builder.append("\n");
+	  }
+	  // Generate response
+          builder.append("HTTP/1.1 200 OK\n");
+          builder.append("Content-Type: text/html; charset=utf-8\n");
+          builder.append("\n");
+		  builder.append("HTTP/1.1 415");
+	  
           // Generate response
           builder.append("HTTP/1.1 200 OK\n");
           builder.append("Content-Type: text/html; charset=utf-8\n");
@@ -302,12 +313,6 @@ class WebServer {
       return "No files in directory";
     }
   }
-
-  /**
-   * Read bytes from a file and return them in the byte array. We read in blocks
-   * of 512 bytes for efficiency.
-   */
-  public static byte[] readFileInBytes(File f) throws IOException {
 
     FileInputStream file = new FileInputStream(f);
     ByteArrayOutputStream data = new ByteArrayOutputStream(file.available());
