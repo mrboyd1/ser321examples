@@ -28,7 +28,7 @@ import java.nio.charset.Charset;
 
 class WebServer {
   public static void main(String args[]) {
-    WebServer server = new WebServer(8080);
+    WebServer server = new WebServer(9000);
   }
 
   /**
@@ -202,17 +202,14 @@ class WebServer {
           query_pairs = splitQuery(request.replace("multiply?", ""));
 
           // extract required fields from parameters
+	  Integer result = 0 ;
+	  try{
           Integer num1 = Integer.parseInt(query_pairs.get("num1"));
           Integer num2 = Integer.parseInt(query_pairs.get("num2"));
-
           // do math
-	  try{
-          Integer result = num1 * num2;
-	  }
-	  catch(Exception e){
-	  builder.append("HTTP/1.1 415 Unsupported Media Type\n");
-	  builder.append("\n");
-	  }
+	  
+          result = num1 * num2;
+	  
 	  // Generate response
           builder.append("HTTP/1.1 200 OK\n");
           builder.append("Content-Type: text/html; charset=utf-8\n");
@@ -224,7 +221,11 @@ class WebServer {
           builder.append("Content-Type: text/html; charset=utf-8\n");
           builder.append("\n");
           builder.append("Result is: " + result);
-
+          }
+	  catch(Exception e){
+          builder.append("HTTP/1.1 415 Unsupported Media Type\n");
+          builder.append("\n");
+          builder.append("Enter 2 numbers\n");}
           // TODO: Include error handling here with a correct error code and
           // a response that makes sense
 
@@ -242,6 +243,36 @@ class WebServer {
           String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
           System.out.println(json);
 
+
+          String[] output = json.split("\"");
+          //JSONObject jsonObj = new JSONObject(json);
+	  System.out.println("\n\n\n");
+	  builder.append("HTTP/1.1 200 OK\n");
+
+	  for(int i = 0; i < output.length; i++)
+	  {
+		  if(output[i].equals("id"))
+		  {
+			  builder.append("id"+ output[i+1]);
+			  System.out.print("id"+ output[i+1]);
+		  }
+		  if(output[i].equals("name"))
+		  {
+			  builder.append(" repo name: "+ output[i+2]);
+			  System.out.print(" repo name: "+ output[i+2]);
+		  }
+                  if(output[i].equals("login"))
+		  {
+			  builder.append(" owner: " + output[i+2] + "\n");
+			  System.out.print(" owner: "+ output[i+2] + "\n");
+		  }
+		  //System.out.println(i+": " + output[i]);
+		  //if(i == 45)
+		  //{
+			//  break;
+		  //}
+	  }
+	  //System.out.println(jsonObj.get("id"));
           builder.append("Check the todos mentioned in the Java source file");
           // TODO: Parse the JSON returned by your fetch and create an appropriate
           // response
@@ -313,7 +344,7 @@ class WebServer {
       return "No files in directory";
     }
   }
-
+  public static byte[] readFileInBytes(File f) throws IOException {
     FileInputStream file = new FileInputStream(f);
     ByteArrayOutputStream data = new ByteArrayOutputStream(file.available());
 
